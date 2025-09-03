@@ -193,24 +193,41 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
         }
 
         const jumlah = parseInt(currentItem.jumlah)
-        const discount = parseFloat(currentItem.discount) || 0 // Now in Rupiah
-        const subtotal = item.harga * jumlah
-        const total_setelah_discount = subtotal - discount // Direct subtraction of discount amount
+        const discount = parseFloat(currentItem.discount) || 0 // In Rupiah
 
         // Cek apakah barang sudah ada di cart
         const existingIndex = cart.findIndex(cartItem => cartItem.item_id === currentItem.item_id)
+        const existingQuantity = existingIndex >= 0 ? cart[existingIndex].jumlah : 0
+        const totalRequestedQuantity = existingQuantity + jumlah
+
+        // Validasi stok tersedia
+        if (totalRequestedQuantity > item.qty) {
+            setMessage(`❌ Stok tidak cukup! Stok tersedia: ${item.qty}, di keranjang: ${existingQuantity}, diminta: ${jumlah}`)
+            return
+        }
+
+        const subtotal = item.harga * jumlah
+
+        // Ensure discount doesn't exceed subtotal
+        const validDiscount = Math.min(discount, subtotal)
+
+        const total_setelah_discount = subtotal - validDiscount
 
         if (existingIndex >= 0) {
             // Update item yang sudah ada
             const newCart = [...cart]
             const newJumlah = newCart[existingIndex].jumlah + jumlah
             const newSubtotal = item.harga * newJumlah
-            const newTotal = newSubtotal - discount // Direct subtraction of discount amount
+
+            // Ensure discount doesn't exceed subtotal when updating existing item
+            const newValidDiscount = Math.min(validDiscount, newSubtotal)
+
+            const newTotal = newSubtotal - newValidDiscount
 
             newCart[existingIndex] = {
                 ...newCart[existingIndex],
                 jumlah: newJumlah,
-                discount: discount,
+                discount: newValidDiscount,
                 subtotal: newSubtotal,
                 total_setelah_discount: newTotal
             }
@@ -224,7 +241,7 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
                 nama_barang: item.nama_barang,
                 harga: item.harga,
                 jumlah: jumlah,
-                discount: discount,
+                discount: validDiscount,
                 subtotal: subtotal,
                 total_setelah_discount: total_setelah_discount
             }
@@ -257,21 +274,46 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
     }
 
     const updateCartItem = (id: string, field: string, value: string | number) => {
+        // For quantity updates, check stock limits
+        if (field === 'jumlah') {
+            const cartItem = cart.find(item => item.id === id)
+            if (cartItem) {
+                const newQuantity = Number(value)
+                const itemData = items.find(i => i.id.toString() === cartItem.item_id)
+
+                // Check if we have the item in our items array and if the quantity exceeds stock
+                if (itemData && newQuantity > itemData.qty) {
+                    setMessage(`❌ Stok tidak cukup! Stok tersedia: ${itemData.qty}, diminta: ${newQuantity}`)
+                    return
+                }
+            }
+        }
+
         const newCart = cart.map(item => {
             if (item.id === id) {
+                // Store the updated field value in the updatedItem
                 const updatedItem = { ...item, [field]: value }
 
                 // Recalculate totals if jumlah or discount changed
                 if (field === 'jumlah' || field === 'discount') {
+                    // Get the updated values, using either the new value or the existing item value
                     const jumlah = field === 'jumlah' ? Number(value) : item.jumlah
-                    const discount = field === 'discount' ? Number(value) : item.discount // Now in Rupiah
-                    const subtotal = item.harga * jumlah
-                    const total_setelah_discount = subtotal - discount // Direct subtraction of discount amount
+                    const discount = field === 'discount' ? Number(value) : item.discount // In Rupiah
 
+                    // Calculate subtotal based on quantity and price
+                    const subtotal = item.harga * jumlah
+
+                    // Ensure discount doesn't exceed subtotal
+                    const validDiscount = Math.min(discount, subtotal)
+
+                    // Calculate total after discount
+                    const total_setelah_discount = subtotal - validDiscount
+
+                    // Return the updated item with all recalculated values
                     return {
                         ...updatedItem,
                         jumlah: jumlah,
-                        discount: discount,
+                        discount: validDiscount, // Use the validated discount
                         subtotal: subtotal,
                         total_setelah_discount: total_setelah_discount
                     }
@@ -572,14 +614,26 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
                             {/* Quantity and Discount inputs */}
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Jumlah</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Jumlah
+                                        {currentItem.item_id && (
+                                            <span className="text-sm font-normal text-gray-500 ml-2">
+                                                (Stok: {items.find(item => item.id.toString() === currentItem.item_id)?.qty || 0})
+                                            </span>
+                                        )}
+                                    </label>
                                     <input
                                         type="number"
                                         value={currentItem.jumlah}
                                         onChange={(e) => handleCurrentItemChange('jumlah', e.target.value)}
                                         placeholder="1"
                                         min="1"
-                                        className="w-full px-4 py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 shadow-sm text-lg"
+                                        max={currentItem.item_id ? items.find(item => item.id.toString() === currentItem.item_id)?.qty || 999 : 999}
+                                        className={`w-full px-4 py-4 border ${currentItem.item_id &&
+                                            parseInt(currentItem.jumlah) > (items.find(item => item.id.toString() === currentItem.item_id)?.qty || 0)
+                                            ? 'border-red-300 bg-red-50'
+                                            : 'border-gray-300'
+                                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 shadow-sm text-lg`}
                                     />
                                 </div>
                                 <div>
@@ -649,9 +703,20 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
                                                         <input
                                                             type="number"
                                                             value={cartItem.jumlah}
-                                                            onChange={(e) => updateCartItem(cartItem.id, 'jumlah', parseInt(e.target.value) || 1)}
+                                                            onChange={(e) => {
+                                                                const value = e.target.value === '' ? '1' : e.target.value;
+                                                                updateCartItem(cartItem.id, 'jumlah', parseInt(value) || 1);
+                                                            }}
+                                                            onBlur={(e) => {
+                                                                // Ensure value is at least 1 on blur
+                                                                if (!e.target.value || parseInt(e.target.value) < 1) {
+                                                                    updateCartItem(cartItem.id, 'jumlah', 1);
+                                                                }
+                                                            }}
                                                             min="1"
+                                                            max={items.find(item => item.id.toString() === cartItem.item_id)?.qty || 999}
                                                             className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                                            title={`Stok tersedia: ${items.find(item => item.id.toString() === cartItem.item_id)?.qty || 'N/A'}`}
                                                         />
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -660,7 +725,14 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
                                                             <input
                                                                 type="number"
                                                                 value={cartItem.discount}
-                                                                onChange={(e) => updateCartItem(cartItem.id, 'discount', parseFloat(e.target.value) || 0)}
+                                                                onChange={(e) => {
+                                                                    const value = e.target.value === '' ? '0' : e.target.value;
+                                                                    updateCartItem(cartItem.id, 'discount', parseFloat(value) || 0);
+                                                                }}
+                                                                onBlur={(e) => {
+                                                                    // Recalculate on blur to ensure final value is correct
+                                                                    updateCartItem(cartItem.id, 'discount', parseFloat(e.target.value) || 0);
+                                                                }}
                                                                 min="0"
                                                                 className="w-32 pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                                                             />
@@ -714,7 +786,7 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <div className="flex items-center justify-center">
