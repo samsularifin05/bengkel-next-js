@@ -1,0 +1,94 @@
+// Schema Database Aplikasi Bengkel
+// Dibuat untuk Next.js dengan Prisma dan SQLite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Tabel Customer (Pelanggan)
+model Customer {
+  id              Int      @id @default(autoincrement())
+  kode_customer   String   @unique
+  nama_customer   String
+  no_hp           String
+  alamat_customer String
+  tgl_daftar      DateTime @default(now())
+
+  // Relasi ke transaksi
+  transactions Transaction[]
+
+  @@map("customers")
+}
+
+// Tabel Item (Barang)
+model Item {
+  id          Int    @id @default(autoincrement())
+  kode_barang String @unique
+  nama_barang String
+  qty         Int
+  merek       String
+  harga       Int
+
+  // Relasi ke detail transaksi barang
+  transaction_items TransactionItem[]
+
+  @@map("items")
+}
+
+// Tabel Transaction (Transaksi)
+model Transaction {
+  id             Int           @id @default(autoincrement())
+  no_transaksi   String        @unique
+  tgl_transaksi  DateTime      @default(now())
+  type_pelanggan TypePelanggan
+  customer_id    Int?
+  no_hp_customer String?
+
+  // Relasi ke customer (nullable untuk nonmember)
+  customer Customer? @relation(fields: [customer_id], references: [id])
+
+  // Relasi ke detail jasa dan barang
+  transaction_services TransactionService[]
+  transaction_items    TransactionItem[]
+
+  @@map("transactions")
+}
+
+// Tabel Transaction Service (Detail Jasa)
+model TransactionService {
+  id           Int    @id @default(autoincrement())
+  transaksi_id Int
+  nama_jasa    String
+  harga        Int
+
+  // Relasi ke transaksi
+  transaction Transaction @relation(fields: [transaksi_id], references: [id], onDelete: Cascade)
+
+  @@map("transaction_services")
+}
+
+// Tabel Transaction Item (Detail Barang)
+model TransactionItem {
+  id           Int @id @default(autoincrement())
+  transaksi_id Int
+  item_id      Int
+  jumlah       Int
+  total_harga  Int
+
+  // Relasi ke transaksi dan item
+  transaction Transaction @relation(fields: [transaksi_id], references: [id], onDelete: Cascade)
+  item        Item        @relation(fields: [item_id], references: [id])
+
+  @@map("transaction_items")
+}
+
+// Enum untuk tipe pelanggan
+enum TypePelanggan {
+  member
+  nonmember
+}
