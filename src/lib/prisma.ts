@@ -6,9 +6,11 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function getPrismaClient() {
-    return new PrismaClient({
-        log: ['query'],
-    }).$extends(withAccelerate())
+    const client = new PrismaClient({
+        log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+    })
+
+    return client.$extends(withAccelerate())
 }
 
 export const prisma = globalForPrisma.prisma ?? getPrismaClient()

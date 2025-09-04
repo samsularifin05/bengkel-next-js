@@ -10,9 +10,13 @@ export async function GET() {
             }
         })
         return NextResponse.json(customers)
-    } catch (error) {
+    } catch (error: any) {
+        console.error('Error fetching customers:', error)
         return NextResponse.json(
-            { error: 'Gagal mengambil data customer' },
+            {
+                error: 'Gagal mengambil data customer',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            },
             { status: 500 }
         )
     }
