@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/transactions/[id] - Ambil transaksi by ID dengan semua relasi
+// GET /api/transactions/[id] - Get a specific transaction
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
     try {
-        const { id: idParam } = await params
+        const { id: idParam } = params
         const id = parseInt(idParam)
 
         if (isNaN(id)) {
@@ -67,10 +67,10 @@ export async function GET(
 // DELETE /api/transactions/[id] - Hapus transaksi by ID
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
     try {
-        const { id: paramId } = await params
+        const { id: paramId } = params
         const id = parseInt(paramId)
 
         if (isNaN(id)) {

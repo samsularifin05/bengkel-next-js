@@ -11,7 +11,7 @@ interface Column {
 }
 
 interface TableProps {
-    data: any[]
+    data: any[] | null | undefined;
     columns: Column[]
     loading?: boolean
     onEdit?: (row: any) => void
@@ -44,9 +44,9 @@ export default function GlobalTable({
 
     // Filter data based on search term
     const filteredData = useMemo(() => {
-        if (!searchTerm || !searchable) return data
+        if (!searchTerm || !searchable) return data || []
 
-        return data.filter((row) => {
+        return data ? data.filter((row) => {
             return columns.some((column) => {
                 if (column.searchable === false) return false
 
@@ -55,15 +55,15 @@ export default function GlobalTable({
 
                 return String(value).toLowerCase().includes(searchTerm.toLowerCase())
             })
-        })
+        }) : []
     }, [data, searchTerm, columns, searchable])
 
     // Pagination logic
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+    const totalPages = Math.ceil((filteredData?.length || 0) / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
-    const paginatedData = pagination
+    const paginatedData = pagination && Array.isArray(filteredData)
         ? filteredData.slice(startIndex, startIndex + itemsPerPage)
-        : filteredData
+        : filteredData || []
 
     // Reset current page when search changes
     useEffect(() => {
@@ -161,7 +161,7 @@ export default function GlobalTable({
                     </div>
                     {searchTerm && (
                         <div className="mt-2 text-sm text-gray-600">
-                            Menampilkan {filteredData.length} dari {data.length} data
+                            Menampilkan {filteredData?.length || 0} dari {data?.length || 0} data
                         </div>
                     )}
                 </div>
@@ -189,7 +189,7 @@ export default function GlobalTable({
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {paginatedData.length === 0 ? (
+                            {!paginatedData || paginatedData.length === 0 ? (
                                 <tr>
                                     <td
                                         colSpan={columns.length + (actions ? 1 : 0)}
@@ -262,11 +262,11 @@ export default function GlobalTable({
 
 
             {/* Pagination */}
-            {pagination && filteredData.length > 0 && (
+            {pagination && (filteredData?.length || 0) > 0 && (
                 <div className="bg-white rounded-lg shadow-sm px-6 py-4">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-sm text-gray-700">
-                            Menampilkan {startIndex + 1} sampai {Math.min(startIndex + itemsPerPage, filteredData.length)} dari {filteredData.length} data
+                            Menampilkan {startIndex + 1} sampai {Math.min(startIndex + itemsPerPage, filteredData?.length || 0)} dari {filteredData?.length || 0} data
                         </div>
                         {totalPages > 1 ? (
                             <div className="flex items-center space-x-2">

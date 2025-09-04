@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 // GET /api/customers/[id] - Get a specific customer
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
     try {
-        const { id: idParam } = await params
+        const { id: idParam } = params
         const id = parseInt(idParam)
 
         if (isNaN(id)) {
@@ -41,13 +41,13 @@ export async function GET(
     }
 }
 
-// DELETE /api/customers/[id] - Hapus customer by ID
-export async function DELETE(
+// PUT /api/customers/[id] - Update a customer
+export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: { id: string } }
 ) {
     try {
-        const { id: idParam } = await params
+        const { id: idParam } = params
         const id = parseInt(idParam)
         console.log('Attempting to delete customer with ID:', id)
 

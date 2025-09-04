@@ -9,7 +9,7 @@
     "build:turbo": "prisma generate && next build --turbopack",
     "export": "prisma generate && next build && next export",
     "build:static": "prisma generate && next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "@prisma/extension-accelerate": "^2.0.2",
+    "dotenv": "^17.2.2",
     "next": "15.5.2",
     "prisma": "^6.15.0",
     "react": "19.1.0",
