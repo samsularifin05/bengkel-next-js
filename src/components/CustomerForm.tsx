@@ -67,10 +67,19 @@ export default function CustomerForm({ onSuccess }: CustomerFormProps) {
                     }
                 }, 1500)
             } else {
-                setMessage(data.error || 'Terjadi kesalahan')
+                // Tampilkan pesan error yang lebih detail
+                if (data.code === 'P6001') {
+                    setMessage('Error database: Konfigurasi URL database tidak valid');
+                } else if (data.message) {
+                    setMessage(`${data.error}: ${data.message}`);
+                } else {
+                    setMessage(data.error || 'Terjadi kesalahan');
+                }
+                console.error('API Error:', data);
             }
         } catch (error) {
-            setMessage('Terjadi kesalahan jaringan')
+            console.error('Fetch error:', error);
+            setMessage('Terjadi kesalahan jaringan. Periksa konsol browser untuk detail.')
         } finally {
             setLoading(false)
         }

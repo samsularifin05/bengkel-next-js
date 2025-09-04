@@ -53,10 +53,29 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             )
         }
+
+        // Log error dengan detail
         console.error('Error creating customer:', error)
+        console.error('Error code:', error.code)
+        console.error('Error message:', error.message)
+
+        // Tangani error Prisma
+        if (error.code === 'P6001') {
+            return NextResponse.json(
+                {
+                    error: 'Database configuration error',
+                    message: 'Check DATABASE_URL format',
+                    details: process.env.NODE_ENV === 'development' ? error.message : 'Contact administrator'
+                },
+                { status: 500 }
+            )
+        }
+
         return NextResponse.json(
             {
                 error: 'Gagal menambah customer',
+                code: error.code,
+                message: error.message,
                 details: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined
             },
             { status: 500 }

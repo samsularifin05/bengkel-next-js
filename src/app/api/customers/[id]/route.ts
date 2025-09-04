@@ -15,8 +15,11 @@ export async function GET(
             )
         }
 
+        // Consultar customer por ID
         const customer = await prisma.customer.findUnique({
-            where: { id }
+            where: {
+                id: id
+            }
         })
 
         if (!customer) {
@@ -66,12 +69,14 @@ export async function PUT(
 
         // Update customer
         const customer = await prisma.customer.update({
-            where: { id },
+            where: {
+                id: id
+            },
             data: {
-                kode_customer,
-                nama_customer,
-                no_hp,
-                alamat_customer
+                kode_customer: kode_customer,
+                nama_customer: nama_customer,
+                no_hp: no_hp,
+                alamat_customer: alamat_customer
             }
         })
 
@@ -118,8 +123,11 @@ export async function DELETE(
 
         // Cek apakah customer masih digunakan di transaksi
         console.log('Checking existing transactions for customer:', id)
+        // Usar findMany para buscar transacciones
         const existingTransactions = await prisma.transaction.findMany({
-            where: { customer_id: id }
+            where: {
+                customer_id: id
+            }
         })
 
         if (existingTransactions.length > 0) {
@@ -132,7 +140,9 @@ export async function DELETE(
 
         console.log('Proceeding to delete customer:', id)
         const customer = await prisma.customer.delete({
-            where: { id }
+            where: {
+                id: id
+            }
         })
 
         console.log('Customer deleted successfully:', customer)

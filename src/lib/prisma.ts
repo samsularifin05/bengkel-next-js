@@ -11,7 +11,8 @@ if (!process.env.DATABASE_URL) {
     }
 }
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgres://27f91cda97116c5c750e8bb46f085615bf165e9e3eb9e3eae566b59f09536cc9:sk_BGOJ2HjrGU4R70JpQAK1D@db.prisma.io:5432/postgres?sslmode=require'
+// URL para conexión directa a la base de datos
+const databaseUrl = process.env.DATABASE_URL || 'postgres://27f91cda97116c5c750e8bb46f085615bf165e9e3eb9e3eae566b59f09536cc9:sk_BGOJ2HjrGU4R70JpQAK1D@db.prisma.io:5432/postgres?sslmode=require'
 
 const globalForPrisma = globalThis as unknown as {
     prisma: ReturnType<typeof getPrismaClient> | undefined
@@ -19,18 +20,20 @@ const globalForPrisma = globalThis as unknown as {
 
 function getPrismaClient() {
     try {
+        console.log(`Running in ${process.env.NODE_ENV || 'development'} environment`)
+
+        // Create a basic Prisma client
         const client = new PrismaClient({
-            log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+            log: process.env.NODE_ENV === 'development' ? ['query', 'error'] : ['error'],
             datasources: {
                 db: {
-                    url: DATABASE_URL,
+                    url: databaseUrl
                 }
             }
         })
 
-        // Tambahkan penanganan error khusus untuk Vercel
-        const extendedClient = client.$extends(withAccelerate())
-        return extendedClient
+        // No usaremos Prisma Accelerate por ahora para evitar errores
+        return client
     } catch (error) {
         console.error('Failed to initialize Prisma client:', error)
         throw error
