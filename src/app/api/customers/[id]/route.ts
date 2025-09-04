@@ -3,12 +3,10 @@ import { prisma } from '@/lib/prisma'
 
 // GET /api/customers/[id] - Get a specific customer
 export async function GET(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: NextRequest
 ) {
     try {
-        const { id: idParam } = params
-        const id = parseInt(idParam)
+        const id = parseInt(request.nextUrl.pathname.split('/').pop() || '')
 
         if (isNaN(id)) {
             return NextResponse.json(
@@ -43,12 +41,10 @@ export async function GET(
 
 // PUT /api/customers/[id] - Update a customer
 export async function PUT(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: NextRequest
 ) {
     try {
-        const { id: idParam } = params
-        const id = parseInt(idParam)
+        const id = parseInt(request.nextUrl.pathname.split('/').pop() || '')
 
         if (isNaN(id)) {
             return NextResponse.json(
@@ -107,12 +103,10 @@ export async function PUT(
 
 // DELETE /api/customers/[id] - Delete a customer
 export async function DELETE(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: NextRequest
 ) {
     try {
-        const { id: idParam } = params
-        const id = parseInt(idParam)
+        const id = parseInt(request.nextUrl.pathname.split('/').pop() || '')
         console.log('Attempting to delete customer with ID:', id)
 
         if (isNaN(id)) {

@@ -3,12 +3,10 @@ import { prisma } from '@/lib/prisma'
 
 // GET /api/transactions/[id] - Get a specific transaction
 export async function GET(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: NextRequest
 ) {
     try {
-        const { id: idParam } = params
-        const id = parseInt(idParam)
+        const id = parseInt(request.nextUrl.pathname.split('/').pop() || '')
 
         if (isNaN(id)) {
             return NextResponse.json(
@@ -66,12 +64,10 @@ export async function GET(
 
 // DELETE /api/transactions/[id] - Hapus transaksi by ID
 export async function DELETE(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: NextRequest
 ) {
     try {
-        const { id: paramId } = params
-        const id = parseInt(paramId)
+        const id = parseInt(request.nextUrl.pathname.split('/').pop() || '')
 
         if (isNaN(id)) {
             return NextResponse.json(

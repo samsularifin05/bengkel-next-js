@@ -3,12 +3,10 @@ import { prisma } from '@/lib/prisma'
 
 // DELETE /api/items/[id] - Hapus item by ID
 export async function DELETE(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    request: NextRequest
 ) {
     try {
-        const { id: idParam } = params
-        const id = parseInt(idParam)
+        const id = parseInt(request.nextUrl.pathname.split('/').pop() || '')
 
         if (isNaN(id)) {
             return NextResponse.json(
