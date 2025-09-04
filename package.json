@@ -4,7 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
+    "start:prod": "NODE_ENV=production node server.js",
+    "build:turbo": "next build --turbopack",
+    "export": "next build && next export",
+    "build:static": "next build",
     "start": "next start",
     "lint": "eslint",
     "db:seed": "node prisma/seed.js",
