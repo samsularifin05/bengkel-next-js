@@ -15,7 +15,7 @@ export async function GET() {
         return NextResponse.json(
             {
                 error: 'Gagal mengambil data customer',
-                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+                details: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined
             },
             { status: 500 }
         )
@@ -53,8 +53,12 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             )
         }
+        console.error('Error creating customer:', error)
         return NextResponse.json(
-            { error: 'Gagal menambah customer' },
+            {
+                error: 'Gagal menambah customer',
+                details: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined
+            },
             { status: 500 }
         )
     }
