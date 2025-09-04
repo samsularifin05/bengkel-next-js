@@ -23,11 +23,37 @@ interface Service {
     harga: string
 }
 
-interface TransactionItem {
+// Used for API data submission
+interface TransactionItemData {
     item_id: string
     jumlah: string
     discount: string
     total_harga: string
+}
+
+interface CreatedTransaction {
+    id: number;
+    no_transaksi: string;
+    tgl_transaksi: string;
+    type_pelanggan: 'member' | 'nonmember';
+    nama_customer?: string;
+    no_hp_customer?: string;
+    customer?: {
+        nama_customer: string;
+        kode_customer: string;
+    };
+    transaction_services: Array<{
+        nama_jasa: string;
+        harga: number;
+    }>;
+    transaction_items: Array<{
+        jumlah: number;
+        total_harga: number;
+        item: {
+            nama_barang: string;
+            kode_barang: string;
+        }
+    }>;
 }
 
 interface CartItem {
@@ -44,7 +70,7 @@ interface CartItem {
 
 interface TransactionFormProps {
     onSuccess?: () => void
-    onTransactionCreated?: (transactionData: any) => void
+    onTransactionCreated?: (transactionData: CreatedTransaction) => void
 }
 
 export default function TransactionForm({ onSuccess, onTransactionCreated }: TransactionFormProps) {
@@ -106,8 +132,8 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
             const response = await fetch('/api/customers')
             const data = await response.json()
             setCustomers(data)
-        } catch (error) {
-            console.error('Error fetching customers:', error)
+        } catch (err) {
+            console.error('Error fetching customers:', err)
         }
     }
 
@@ -116,8 +142,8 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
             const response = await fetch('/api/items')
             const data = await response.json()
             setItems(data)
-        } catch (error) {
-            console.error('Error fetching items:', error)
+        } catch (err) {
+            console.error('Error fetching items:', err)
         }
     }
 
@@ -394,7 +420,8 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
             } else {
                 setMessage(data.error || 'Terjadi kesalahan')
             }
-        } catch (error) {
+        } catch (err) {
+            console.error('Network error:', err);
             setMessage('Terjadi kesalahan jaringan')
         } finally {
             setLoading(false)

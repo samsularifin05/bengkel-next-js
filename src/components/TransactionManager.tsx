@@ -5,6 +5,31 @@ import DataManager from './DataManager'
 import TransactionForm from './TransactionForm'
 import TransactionReceipt from './TransactionReceipt'
 
+interface CreatedTransaction {
+    id: number;
+    no_transaksi: string;
+    tgl_transaksi: string;
+    type_pelanggan: 'member' | 'nonmember';
+    nama_customer?: string;
+    no_hp_customer?: string;
+    customer?: {
+        nama_customer: string;
+        kode_customer: string;
+    };
+    transaction_services: Array<{
+        nama_jasa: string;
+        harga: number;
+    }>;
+    transaction_items: Array<{
+        jumlah: number;
+        total_harga: number;
+        item: {
+            nama_barang: string;
+            kode_barang: string;
+        }
+    }>;
+}
+
 interface Transaction {
     id: number
     no_transaksi: string
@@ -34,7 +59,25 @@ export default function TransactionManager() {
     const [loading, setLoading] = useState(true)
     const [refreshTrigger, setRefreshTrigger] = useState(0)
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
-    const [receiptData, setReceiptData] = useState<any>(null)
+    interface ReceiptData {
+        no_transaksi: string;
+        tanggal_transaksi: string;
+        type_pelanggan: 'member' | 'nonmember';
+        customer_name: string;
+        no_hp_customer?: string;
+        services: Array<{
+            nama_jasa: string;
+            harga: number;
+        }>;
+        items: Array<{
+            nama_barang: string;
+            quantity: number;
+            harga: number;
+        }>;
+        total_amount: number;
+    }
+
+    const [receiptData, setReceiptData] = useState<ReceiptData | null>(null)
     const [showReceipt, setShowReceipt] = useState(false)
 
     const fetchTransactions = async () => {
@@ -104,7 +147,7 @@ export default function TransactionManager() {
             key: 'customer',
             header: 'Customer',
             className: 'text-gray-700',
-            render: (value: any, row: Transaction) => {
+            render: (value: unknown, row: Transaction) => {
                 if (row.customer) {
                     return `${row.customer.kode_customer} - ${row.customer.nama_customer}`
                 }
@@ -115,7 +158,7 @@ export default function TransactionManager() {
             key: 'total',
             header: 'Total',
             className: 'text-gray-900 font-medium',
-            render: (value: any, row: Transaction) => formatCurrency(calculateTotal(row))
+            render: (value: unknown, row: Transaction) => formatCurrency(calculateTotal(row))
         }
     ]
 
@@ -124,9 +167,9 @@ export default function TransactionManager() {
             onSuccess={() => {
                 setRefreshTrigger(prev => prev + 1)
             }}
-            onTransactionCreated={(createdTransaction) => {
+            onTransactionCreated={(createdTransaction: CreatedTransaction) => {
                 // Format data untuk receipt
-                const receipt = {
+                const receipt: ReceiptData = {
                     no_transaksi: createdTransaction.no_transaksi,
                     tanggal_transaksi: createdTransaction.tgl_transaksi || new Date().toISOString(),
                     type_pelanggan: createdTransaction.type_pelanggan,
@@ -134,17 +177,17 @@ export default function TransactionManager() {
                         ? createdTransaction.customer?.nama_customer || 'Customer Member'
                         : createdTransaction.nama_customer || 'Customer Nonmember',
                     no_hp_customer: createdTransaction.no_hp_customer,
-                    services: (createdTransaction.transaction_services || []).map((service: any) => ({
+                    services: (createdTransaction.transaction_services || []).map((service) => ({
                         nama_jasa: service.nama_jasa,
                         harga: service.harga
                     })),
-                    items: (createdTransaction.transaction_items || []).map((item: any) => ({
+                    items: (createdTransaction.transaction_items || []).map((item) => ({
                         nama_barang: item.item.nama_barang,
                         quantity: item.jumlah,
                         harga: item.total_harga / item.jumlah // harga per unit
                     })),
-                    total_amount: (createdTransaction.transaction_services || []).reduce((sum: number, service: any) => sum + service.harga, 0) +
-                        (createdTransaction.transaction_items || []).reduce((sum: number, item: any) => sum + item.total_harga, 0)
+                    total_amount: (createdTransaction.transaction_services || []).reduce((sum: number, service) => sum + service.harga, 0) +
+                        (createdTransaction.transaction_items || []).reduce((sum: number, item) => sum + item.total_harga, 0)
                 }
                 setReceiptData(receipt)
                 setShowReceipt(true)
@@ -260,7 +303,7 @@ export default function TransactionManager() {
 
     const handleReprint = (transaction: Transaction) => {
         // Format data untuk reprint receipt
-        const receipt = {
+        const receipt: ReceiptData = {
             no_transaksi: transaction.no_transaksi,
             tanggal_transaksi: transaction.tgl_transaksi,
             type_pelanggan: transaction.type_pelanggan,
@@ -268,11 +311,11 @@ export default function TransactionManager() {
                 ? transaction.customer?.nama_customer || 'Customer Member'
                 : transaction.no_hp_customer || 'Customer Nonmember',
             no_hp_customer: transaction.no_hp_customer,
-            services: (transaction.transaction_services || []).map((service: any) => ({
+            services: (transaction.transaction_services || []).map((service) => ({
                 nama_jasa: service.nama_jasa,
                 harga: service.harga
             })),
-            items: (transaction.transaction_items || []).map((item: any) => ({
+            items: (transaction.transaction_items || []).map((item) => ({
                 nama_barang: item.item.nama_barang,
                 quantity: item.jumlah,
                 harga: item.total_harga / item.jumlah

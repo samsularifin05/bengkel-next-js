@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState, useMemo } from 'react'
+import { ReactNode, useState, useMemo, useEffect } from 'react'
 
 interface Column {
     key: string
@@ -66,7 +66,7 @@ export default function GlobalTable({
         : filteredData
 
     // Reset current page when search changes
-    useMemo(() => {
+    useEffect(() => {
         setCurrentPage(1)
     }, [searchTerm])
 
