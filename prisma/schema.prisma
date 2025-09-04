@@ -1,12 +1,12 @@
 // Schema Database Aplikasi Bengkel
-// Dibuat untuk Next.js dengan Prisma dan SQLite
+// Dibuat untuk Next.js dengan Prisma dan PostgreSQL
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
