@@ -605,6 +605,11 @@ export default function TransactionForm({ onSuccess, onTransactionCreated }: Tra
                                             e.currentTarget.value = '';
                                         }
                                     }}
+                                    onBlur={(e) => {
+                                        e.preventDefault();
+                                        handleBarcodeScanned(e.currentTarget.value);
+                                        e.currentTarget.value = '';
+                                    }}
                                     className="w-full px-6 py-4 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-2xl font-mono bg-white shadow-sm text-gray-800 tracking-wide"
                                     autoComplete="off"
                                     style={{ letterSpacing: '0.1em' }}
