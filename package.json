@@ -4,17 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start:prod": "NODE_ENV=production node server.js",
-    "build:turbo": "next build --turbopack",
-    "export": "next build && next export",
-    "build:static": "next build",
+    "build:turbo": "prisma generate && next build --turbopack",
+    "export": "prisma generate && next build && next export",
+    "build:static": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "node prisma/seed.js",
-    "db:reset": "prisma migrate reset --force && npm run db:seed"
+    "db:reset": "prisma migrate reset --force && npm run db:seed",
+    "postinstall": "prisma generate",
+    "init": "npx prisma migrate dev --name init_postgres"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
