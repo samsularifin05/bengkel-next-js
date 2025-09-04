@@ -9,13 +9,22 @@
             }
         }
     ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "/"
+        }
+    ],
     "build": {
         "env": {
-            "PRISMA_GENERATE_DATAPROXY": "true"
+            "PRISMA_GENERATE_DATAPROXY": "false",
+            "PRISMA_CLIENT_ENGINE_TYPE": "binary"
         }
     },
     "env": {
-        "DATABASE_URL": "postgres://27f91cda97116c5c750e8bb46f085615bf165e9e3eb9e3eae566b59f09536cc9:sk_BGOJ2HjrGU4R70JpQAK1D@db.prisma.io:5432/postgres?sslmode=require",
-        "NODE_ENV": "production"
+        "DATABASE_URL": "prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19zYXNEMW1jOWdZRWp1dUsxYXBvWUMiLCJhcGlfa2V5IjoiMDFLNDlUWkNGNllHV0FYQVJDRFlDUVFOR1ciLCJ0ZW5hbnRfaWQiOiIyN2Y5MWNkYTk3MTE2YzVjNzUwZThiYjQ2ZjA4NTYxNWJmMTY1ZTllM2ViOWUzZWFlNTY2YjU5ZjA5NTM2Y2M5IiwiaW50ZXJuYWxfc2VjcmV0IjoiMWZjZTE4ZWMtYjczNi00NjNiLThmYmEtYjcwYmZkNTgwYjcxIn0.NGTUHyBkDwpxepQkCNM2wsavsRGnPpTgep4CuU38S3U",
+        "NODE_ENV": "production",
+        "NEXT_PUBLIC_APP_NAME": "Bengkel Management System",
+        "NEXT_PUBLIC_APP_VERSION": "1.0.0"
     }
 }
