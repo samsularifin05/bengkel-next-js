@@ -49,6 +49,70 @@ export async function PUT(
     try {
         const { id: idParam } = params
         const id = parseInt(idParam)
+
+        if (isNaN(id)) {
+            return NextResponse.json(
+                { success: false, error: 'ID customer tidak valid' },
+                { status: 400 }
+            )
+        }
+
+        const body = await request.json()
+        const { kode_customer, nama_customer, no_hp, alamat_customer } = body
+
+        // Validasi input
+        if (!kode_customer || !nama_customer || !no_hp || !alamat_customer) {
+            return NextResponse.json(
+                { success: false, error: 'Semua field harus diisi' },
+                { status: 400 }
+            )
+        }
+
+        // Update customer
+        const customer = await prisma.customer.update({
+            where: { id },
+            data: {
+                kode_customer,
+                nama_customer,
+                no_hp,
+                alamat_customer
+            }
+        })
+
+        return NextResponse.json({
+            success: true,
+            message: 'Customer berhasil diupdate',
+            data: customer
+        })
+    } catch (error: any) {
+        console.error('Update customer error:', error)
+        if (error.code === 'P2025') {
+            return NextResponse.json(
+                { success: false, error: 'Customer tidak ditemukan' },
+                { status: 404 }
+            )
+        }
+        if (error.code === 'P2002') {
+            return NextResponse.json(
+                { success: false, error: 'Kode customer sudah digunakan' },
+                { status: 400 }
+            )
+        }
+        return NextResponse.json(
+            { success: false, error: 'Gagal mengupdate customer', details: error.message },
+            { status: 500 }
+        )
+    }
+}
+
+// DELETE /api/customers/[id] - Delete a customer
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const { id: idParam } = params
+        const id = parseInt(idParam)
         console.log('Attempting to delete customer with ID:', id)
 
         if (isNaN(id)) {
