@@ -11,8 +11,11 @@ if (!process.env.DATABASE_URL) {
     }
 }
 
-// URL para conexión directa a la base de datos
+// URL untuk koneksi database PostgreSQL
 const databaseUrl = process.env.DATABASE_URL || 'postgres://27f91cda97116c5c750e8bb46f085615bf165e9e3eb9e3eae566b59f09536cc9:sk_BGOJ2HjrGU4R70JpQAK1D@db.prisma.io:5432/postgres?sslmode=require'
+
+// Log URL yang digunakan (tetapi sembunyikan kredensial)
+console.log(`Using database URL protocol: ${databaseUrl.split(':')[0]}://****`)
 
 const globalForPrisma = globalThis as unknown as {
     prisma: ReturnType<typeof getPrismaClient> | undefined
@@ -32,7 +35,7 @@ function getPrismaClient() {
             }
         })
 
-        // No usaremos Prisma Accelerate por ahora para evitar errores
+        // Gunakan client biasa tanpa extension untuk menghindari error
         return client
     } catch (error) {
         console.error('Failed to initialize Prisma client:', error)

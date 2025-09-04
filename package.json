@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
-    "vercel-build": "NODE_ENV=production DATABASE_URL=\"postgres://27f91cda97116c5c750e8bb46f085615bf165e9e3eb9e3eae566b59f09536cc9:sk_BGOJ2HjrGU4R70JpQAK1D@db.prisma.io:5432/postgres?sslmode=require\" prisma generate && next build",
+    "vercel-build": "NODE_ENV=production prisma generate && next build",
     "start": "next start",
     "start:prod": "NODE_ENV=production",
     "build:turbo": "prisma generate && next build --turbopack",
