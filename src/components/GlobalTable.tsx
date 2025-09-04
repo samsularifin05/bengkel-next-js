@@ -133,7 +133,6 @@ export default function GlobalTable({
     return (
         <div className="space-y-4 text-black">
             {/* Search Bar */}
-            {process.env.DATABASE_URL} HAI
 
             {searchable && (
                 <div className="bg-white rounded-lg shadow-sm p-4">
