@@ -8,7 +8,7 @@ export async function GET() {
             orderBy: {
                 tgl_daftar: 'desc'
             }
-        })
+        }) || []
         return NextResponse.json(customers)
     } catch (error: any) {
         console.error('Error fetching customers:', error)

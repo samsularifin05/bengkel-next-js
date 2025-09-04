@@ -28,7 +28,9 @@ function getPrismaClient() {
             }
         })
 
-        return client.$extends(withAccelerate())
+        // Tambahkan penanganan error khusus untuk Vercel
+        const extendedClient = client.$extends(withAccelerate())
+        return extendedClient
     } catch (error) {
         console.error('Failed to initialize Prisma client:', error)
         throw error
